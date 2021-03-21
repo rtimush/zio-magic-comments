@@ -6,6 +6,26 @@ lazy val versions = new {
 }
 
 ThisBuild / organization := "com.timushev"
+ThisBuild / homepage := Some(url("https://github.com/rtimush/zio-magic-comments"))
+ThisBuild / licenses += (
+  (
+    "BSD 3-Clause",
+    url("https://github.com/rtimush/zio-magic-comments/blob/master/LICENSE")
+  )
+)
+ThisBuild / publishTo := sonatypePublishToBundle.value
+ThisBuild / developers := List(
+  Developer("rtimush", "Roman Timushev", "rtimush@gmail.com", url("https://github.com/rtimush"))
+)
+ThisBuild / scmInfo := Some(
+  ScmInfo(
+    url("https://github.com/rtimush/zio-magic-comments"),
+    "scm:git:https://github.com/rtimush/zio-magic-comments.git",
+    Some("scm:git:git@github.com:rtimush/zio-magic-comments.git")
+  )
+)
+ThisBuild / sonatypeCredentialHost := "s01.oss.sonatype.org"
+
 ThisBuild / scalaVersion := versions.scala
 ThisBuild / semanticdbEnabled := true
 ThisBuild / semanticdbVersion := scalafixSemanticdb.revision
