@@ -5,6 +5,7 @@ import zio.magic.macros.graph.{Eq, Graph, Node}
 import zio.magic.macros.utils.RenderGraph
 
 import scala.annotation.tailrec
+import scala.meta.Term.Block
 import scala.meta._
 
 class ZioMagicComments extends SemanticRule("ZioMagicComments") {
@@ -51,13 +52,12 @@ class ZioMagicComments extends SemanticRule("ZioMagicComments") {
   private val has: SymbolMatcher = SymbolMatcher.exact("zio/Has#")
 
   @tailrec
-  private def findDeclarationRoot(t: Tree): Option[Tree] = {
+  private def findDeclarationRoot(t: Tree): Option[Tree] =
     t.parent match {
-      case Some(_: Template) => Some(t)
-      case Some(other)       => findDeclarationRoot(other)
-      case None              => None
+      case Some(_: Template | _: Block) => Some(t)
+      case Some(other)                  => findDeclarationRoot(other)
+      case None                         => None
     }
-  }
 
   private def treeComment(t: Tree): Option[Tokens] = {
     for {
