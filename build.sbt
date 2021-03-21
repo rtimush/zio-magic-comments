@@ -1,5 +1,8 @@
+import MatrixUtils._
+
 lazy val versions = new {
-  val scala    = "2.13.5"
+  val scala212 = "2.12.13"
+  val scala213 = "2.13.5"
   val scalafix = "0.9.26"
   val zio      = "1.0.5"
   val zioMagic = "0.1.12"
@@ -26,18 +29,20 @@ ThisBuild / scmInfo := Some(
 )
 ThisBuild / sonatypeCredentialHost := "s01.oss.sonatype.org"
 
-ThisBuild / scalaVersion := versions.scala
 ThisBuild / semanticdbEnabled := true
 ThisBuild / semanticdbVersion := scalafixSemanticdb.revision
 
 lazy val root = project
   .in(file("."))
-  .aggregate(rules, input, output, tests)
+  .aggregate(rules.projectRefs: _*)
+  .aggregate(input.projectRefs: _*)
+  .aggregate(output.projectRefs: _*)
+  .aggregate(tests.projectRefs: _*)
   .settings(
     publish / skip := true
   )
 
-lazy val rules = project
+lazy val rules = projectMatrix
   .settings(
     name := "zio-magic-comments",
     libraryDependencies ++= Seq(
@@ -45,8 +50,9 @@ lazy val rules = project
       "io.github.kitlangton" %% "zio-magic"     % versions.zioMagic
     )
   )
+  .jvmPlatform(scalaVersions = Seq(versions.scala213, versions.scala212))
 
-lazy val input = project
+lazy val input = projectMatrix
   .disablePlugins(ScalafixPlugin)
   .settings(
     publish / skip := true,
@@ -56,8 +62,9 @@ lazy val input = project
       "io.github.kitlangton" %% "zio-magic" % versions.zioMagic
     )
   )
+  .jvmPlatform(scalaVersions = Seq(versions.scala213, versions.scala212))
 
-lazy val output = project
+lazy val output = projectMatrix
   .disablePlugins(ScalafixPlugin)
   .settings(
     publish / skip := true,
@@ -67,17 +74,26 @@ lazy val output = project
       "io.github.kitlangton" %% "zio-magic" % versions.zioMagic
     )
   )
+  .jvmPlatform(scalaVersions = Seq(versions.scala213, versions.scala212))
 
-lazy val tests = project
+lazy val tests = projectMatrix
   .enablePlugins(ScalafixTestkitPlugin)
   .dependsOn(rules)
   .settings(
     publish / skip := true,
-    libraryDependencies += "ch.epfl.scala" % "scalafix-testkit" % versions.scalafix % Test cross CrossVersion.full,
-    Compile / compile :=
-      (Compile / compile).dependsOn(input / Compile / compile).value,
-    scalafixTestkitOutputSourceDirectories := (output / Compile / unmanagedSourceDirectories).value,
-    scalafixTestkitInputSourceDirectories := (input / Compile / unmanagedSourceDirectories).value,
-    scalafixTestkitInputScalacOptions := (input / Compile / scalacOptions).value,
-    scalafixTestkitInputClasspath := (input / Compile / fullClasspath).value
+    libraryDependencies += "ch.epfl.scala" % "scalafix-testkit" % versions.scalafix % Test cross CrossVersion.full
+  )
+  .jvmPlatformDyn(
+    scalaVersions = Seq(versions.scala213, versions.scala212),
+    settings = { (scalaVersion: String) =>
+      val inputProject  = input.jvm(scalaVersion)
+      val outputProject = output.jvm(scalaVersion)
+      Seq(
+        Compile / compile := (Compile / compile).dependsOn(inputProject / Compile / compile).value,
+        scalafixTestkitOutputSourceDirectories := (outputProject / Compile / unmanagedSourceDirectories).value,
+        scalafixTestkitInputSourceDirectories := (inputProject / Compile / unmanagedSourceDirectories).value,
+        scalafixTestkitInputScalacOptions := (inputProject / Compile / scalacOptions).value,
+        scalafixTestkitInputClasspath := (inputProject / Compile / fullClasspath).value
+      )
+    }
   )
