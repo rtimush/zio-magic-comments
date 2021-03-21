@@ -1,6 +1,7 @@
 lazy val versions = new {
   val scala    = "2.13.5"
   val scalafix = "0.9.26"
+  val zio      = "1.0.5"
   val zioMagic = "0.1.12"
 }
 
@@ -29,7 +30,9 @@ lazy val input = project
   .disablePlugins(ScalafixPlugin)
   .settings(
     publish / skip := true,
+    scalacOptions += "-Wconf:any:s",
     libraryDependencies ++= Seq(
+      "dev.zio"              %% "zio-test"  % versions.zio,
       "io.github.kitlangton" %% "zio-magic" % versions.zioMagic
     )
   )
@@ -38,7 +41,9 @@ lazy val output = project
   .disablePlugins(ScalafixPlugin)
   .settings(
     publish / skip := true,
+    scalacOptions += "-Wconf:any:s",
     libraryDependencies ++= Seq(
+      "dev.zio"              %% "zio-test"  % versions.zio,
       "io.github.kitlangton" %% "zio-magic" % versions.zioMagic
     )
   )
