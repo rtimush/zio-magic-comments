@@ -31,3 +31,7 @@ or include the rule in your `build.sbt`:
 ```scala
 ThisBuild / scalafixDependencies += "com.timushev" %% "zio-magic-comments" % "0.1.0"
 ```
+
+## Demo
+
+<img src="https://user-images.githubusercontent.com/831307/111921628-dac47380-8a95-11eb-8520-b1f50bc79dfc.gif" width="541px" height="467px">
