@@ -11,20 +11,20 @@ class LocationsTest {
 
   val zio: ZIO[Clock, Nothing, Unit] = ZIO.never
 
-  zio.provideMagicLayer(Clock.live)
+  zio.inject(Clock.live)
 
-  val sameLine: UIO[Unit] = zio.provideMagicLayer(Clock.live)
+  val sameLine: UIO[Unit] = zio.inject(Clock.live)
 
   val nextLine: UIO[Unit] =
-    zio.provideMagicLayer(Clock.live)
+    zio.inject(Clock.live)
 
   locally {
     val inBlock: UIO[Unit] =
-      zio.provideMagicLayer(Clock.live)
+      zio.inject(Clock.live)
   }
 
   def f(): Unit = {
     val inFunction: UIO[Unit] =
-      zio.provideMagicLayer(Clock.live)
+      zio.inject(Clock.live)
   }
 }

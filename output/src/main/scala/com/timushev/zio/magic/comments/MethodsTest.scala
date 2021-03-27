@@ -11,58 +11,53 @@ class MethodsTest {
   val zspec: ZSpec[NeedsClock, Nothing]   = Spec.test("", ZIO.never, TestAnnotationMap.empty)
 
   // NeedsClock.layer
-  //      │
-  // Clock.live
-  zio.provideMagicLayer(Clock.live, NeedsClock.layer)
+  //       │
+  //  Clock.live
+  zio.inject(Clock.live, NeedsClock.layer)
 
   //    NeedsClock.layer
   //            │
   // ZLayer.requires[Clock]
-  zio.provideSomeMagicLayer[Clock](NeedsClock.layer)
+  zio.injectSome[Clock](NeedsClock.layer)
 
   //    NeedsClock.layer
   //           │
   // ZLayer.requires[ZEnv]
-  zio.provideCustomMagicLayer(NeedsClock.layer)
+  zio.injectCustom(NeedsClock.layer)
 
   // NeedsClock.layer
-  //      │
-  // Clock.live
-  zspec.provideMagicLayer(Clock.live, NeedsClock.layer)
+  //       │
+  //  Clock.live
+  zspec.inject(Clock.live, NeedsClock.layer)
 
   // NeedsClock.layer
-  //      │
-  // Clock.live
-  zspec.provideMagicLayerShared(Clock.live, NeedsClock.layer)
+  //       │
+  //  Clock.live
+  zspec.injectShared(Clock.live, NeedsClock.layer)
 
   //    NeedsClock.layer
   //            │
   // ZLayer.requires[Clock]
-  zspec.provideSomeMagicLayer[Clock](NeedsClock.layer)
-
-  //    NeedsClock.layer
-  //            │
-  // ZLayer.requires[Clock]
-  zspec.provideSomeMagicLayerShared[Clock](NeedsClock.layer)
+  zspec.injectSome[Clock](NeedsClock.layer)
 
   //    NeedsClock.layer
   //           │
   // ZLayer.requires[ZEnv]
-  zspec.provideCustomMagicLayer(NeedsClock.layer)
+  zspec.injectCustom(NeedsClock.layer)
 
   //    NeedsClock.layer
   //           │
   // ZLayer.requires[ZEnv]
-  zspec.provideCustomMagicLayerShared(NeedsClock.layer)
+  zspec.injectCustomShared(NeedsClock.layer)
 
   // NeedsClock.layer
-  //      │
-  // Clock.live
-  ZLayer.fromMagic[NeedsClock](Clock.live, NeedsClock.layer)
+  //       │
+  //  Clock.live
+  ZLayer.wire[NeedsClock](Clock.live, NeedsClock.layer)
 
   //    NeedsClock.layer
   //            │
   // ZLayer.requires[Clock]
-  ZLayer.fromSomeMagic[Clock, NeedsClock](NeedsClock.layer)
+  ZLayer.wireSome[Clock, NeedsClock](NeedsClock.layer)
 
 }
