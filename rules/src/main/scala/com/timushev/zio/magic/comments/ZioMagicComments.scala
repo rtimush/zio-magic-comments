@@ -1,8 +1,8 @@
 package com.timushev.zio.magic.comments
 
 import _root_.scalafix.v1._
-import zio.magic.macros.graph.{Eq, Graph, Node}
-import zio.magic.macros.utils.RenderGraph
+import zio.magic.macros.comments.RenderedGraph
+import zio.magic.macros.graph.{Graph, Node}
 
 import scala.annotation.tailrec
 import scala.meta.Term.Block
@@ -10,28 +10,41 @@ import scala.meta._
 
 class ZioMagicComments extends SemanticRule("ZioMagicComments") {
 
-  type GraphNode = Node[Symbol, RenderGraph]
+  type GraphNode = Node[Symbol, String]
 
   private val provideMagicLayer: SymbolMatcher =
     SymbolMatcher.exact("zio/magic/package.ZioProvideMagicOps#provideMagicLayer().") +
+      SymbolMatcher.exact("zio/magic/package.ZioProvideMagicOps#inject().") +
       SymbolMatcher.exact("zio/magic/package.ZSpecProvideMagicOps#provideMagicLayer().") +
-      SymbolMatcher.exact("zio/magic/package.ZSpecProvideMagicOps#provideMagicLayerShared().")
+      SymbolMatcher.exact("zio/magic/package.ZSpecProvideMagicOps#inject().") +
+      SymbolMatcher.exact("zio/magic/package.ZSpecProvideMagicOps#provideMagicLayerShared().") +
+      SymbolMatcher.exact("zio/magic/package.ZSpecProvideMagicOps#injectShared().")
 
   private val provideSomeMagicLayer: SymbolMatcher =
     SymbolMatcher.exact("zio/magic/package.ZioProvideMagicOps#provideSomeMagicLayer().") +
+      SymbolMatcher.exact("zio/magic/package.ZioProvideMagicOps#injectSome().") +
       SymbolMatcher.exact("zio/magic/package.ZSpecProvideMagicOps#provideSomeMagicLayer().") +
-      SymbolMatcher.exact("zio/magic/package.ZSpecProvideMagicOps#provideSomeMagicLayerShared().")
+      SymbolMatcher.exact("zio/magic/package.ZSpecProvideMagicOps#injectSome().") +
+      SymbolMatcher.exact("zio/magic/package.ZSpecProvideMagicOps#provideSomeMagicLayerShared().") +
+      SymbolMatcher.exact("zio/magic/package.ZSpecProvideMagicOps#injectSomeShared().")
 
   private val provideCustomMagicLayer: SymbolMatcher =
     SymbolMatcher.exact("zio/magic/package.ZioProvideMagicOps#provideCustomMagicLayer().") +
+      SymbolMatcher.exact("zio/magic/package.ZioProvideMagicOps#injectCustom().") +
       SymbolMatcher.exact("zio/magic/package.ZSpecProvideMagicOps#provideCustomMagicLayer().") +
-      SymbolMatcher.exact("zio/magic/package.ZSpecProvideMagicOps#provideCustomMagicLayerShared().")
+      SymbolMatcher.exact("zio/magic/package.ZSpecProvideMagicOps#injectCustom().") +
+      SymbolMatcher.exact(
+        "zio/magic/package.ZSpecProvideMagicOps#provideCustomMagicLayerShared()."
+      ) +
+      SymbolMatcher.exact("zio/magic/package.ZSpecProvideMagicOps#injectCustomShared().")
 
   private val fromMagic: SymbolMatcher =
-    SymbolMatcher.exact("zio/magic/package.ZLayerCompanionOps#fromMagic().")
+    SymbolMatcher.exact("zio/magic/package.ZLayerCompanionOps#fromMagic().") +
+      SymbolMatcher.exact("zio/magic/package.ZLayerCompanionOps#wire().")
 
   private val fromSomeMagic: SymbolMatcher =
-    SymbolMatcher.exact("zio/magic/package.ZLayerCompanionOps#fromSomeMagic().")
+    SymbolMatcher.exact("zio/magic/package.ZLayerCompanionOps#fromSomeMagic().") +
+      SymbolMatcher.exact("zio/magic/package.ZLayerCompanionOps#wireSome().")
 
   private val zlayer: SymbolMatcher    = SymbolMatcher.exact("zio/ZLayer#")
   private val rlayer: SymbolMatcher    = SymbolMatcher.exact("zio/package.RLayer#")
@@ -100,10 +113,6 @@ class ZioMagicComments extends SemanticRule("ZioMagicComments") {
     } yield newLine + indentationTokens.syntax
   }
 
-  implicit private object SymbolEq extends Eq[Symbol] {
-    override def eq(a1: Symbol, a2: Symbol): Boolean = a1.equals(a2)
-  }
-
   private def typeMembers(
       tpe: SemanticType
   )(implicit doc: SemanticDocument): List[Symbol] = {
@@ -137,7 +146,7 @@ class ZioMagicComments extends SemanticRule("ZioMagicComments") {
         case _                                                 => None
       }
       .map { case (in, out) =>
-        Node(in.fold(List.empty[Symbol])(typeMembers), typeMembers(out), RenderGraph(term.syntax))
+        Node(in.fold(List.empty[Symbol])(typeMembers), typeMembers(out), term.syntax)
       }
   }
 
@@ -183,12 +192,12 @@ class ZioMagicComments extends SemanticRule("ZioMagicComments") {
           info.signature match {
             case TypeSignature(_, TypeRef(_, has(_), _), _) =>
               Some(
-                List(Node(Nil, List(tpe.symbol), RenderGraph(s"ZLayer.requires[${tpe.syntax}]")))
+                List(Node(Nil, List(tpe.symbol), s"ZLayer.requires[${tpe.syntax}]"))
               )
             case TypeSignature(_, lowerBound, _) =>
               Some(
                 List(
-                  Node(Nil, typeMembers(lowerBound), RenderGraph(s"ZLayer.requires[${tpe.syntax}]"))
+                  Node(Nil, typeMembers(lowerBound), s"ZLayer.requires[${tpe.syntax}]")
                 )
               )
             case _ => None
@@ -204,7 +213,7 @@ class ZioMagicComments extends SemanticRule("ZioMagicComments") {
     Symbol("zio/PlatformSpecific#ZEnv#").info.flatMap { info =>
       info.signature match {
         case TypeSignature(_, lowerBound, _) =>
-          Some(Node(Nil, typeMembers(lowerBound), RenderGraph(s"ZLayer.requires[ZEnv]")))
+          Some(Node(Nil, typeMembers(lowerBound), s"ZLayer.requires[ZEnv]"))
         case _ => None
       }
     }
@@ -222,11 +231,15 @@ class ZioMagicComments extends SemanticRule("ZioMagicComments") {
   ): Option[Seq[String]] = {
     for {
       nodes <- sequence(layers.map(layerTermToNode(_)))
-      renderGraph <- Graph(inputs ++ nodes)
+      layerCompose <- Graph[Symbol, String](inputs ++ nodes, { case (a, b) => a == b })
+        .map(layer => RenderedGraph(layer))
         .buildComplete(outputs)
         .toOption
+      rendered = layerCompose
+        .fold[RenderedGraph](RenderedGraph.empty, identity, _ ++ _, _ >>> _)
+        .render
     } yield fansi
-      .Str(renderGraph.render)
+      .Str(rendered)
       .plainText
       .linesIterator
       .map(_.replaceAll(" *$", ""))
