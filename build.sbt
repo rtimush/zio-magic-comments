@@ -2,7 +2,7 @@ import MatrixUtils._
 
 lazy val versions = new {
   val scala212 = "2.12.13"
-  val scala213 = "2.13.5"
+  val scala213 = "2.13.6"
   val scalafix = "0.9.27"
   val zio      = "1.0.7"
   val zioMagic = "0.2.5"
