@@ -4,8 +4,8 @@ lazy val versions = new {
   val scala212 = "2.12.13"
   val scala213 = "2.13.5"
   val scalafix = "0.9.27"
-  val zio      = "1.0.7"
-  val zioMagic = "0.2.6"
+  val zio      = "1.0.8"
+  val zioMagic = "0.2.5"
 }
 
 ThisBuild / organization := "com.timushev"
