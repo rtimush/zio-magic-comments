@@ -9,7 +9,7 @@ lazy val versions = new {
 }
 
 ThisBuild / organization := "com.timushev"
-ThisBuild / homepage := Some(url("https://github.com/rtimush/zio-magic-comments"))
+ThisBuild / homepage     := Some(url("https://github.com/rtimush/zio-magic-comments"))
 ThisBuild / licenses += (
   (
     "BSD 3-Clause",
@@ -93,7 +93,7 @@ lazy val tests = projectMatrix
         scalafixTestkitOutputSourceDirectories := (outputProject / Compile / unmanagedSourceDirectories).value,
         scalafixTestkitInputSourceDirectories := (inputProject / Compile / unmanagedSourceDirectories).value,
         scalafixTestkitInputScalacOptions := (inputProject / Compile / scalacOptions).value,
-        scalafixTestkitInputClasspath := (inputProject / Compile / fullClasspath).value
+        scalafixTestkitInputClasspath     := (inputProject / Compile / fullClasspath).value
       )
     }
   )
